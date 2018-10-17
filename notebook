@@ -1,0 +1,53 @@
+1. 当然，先下载源码：
+
+$ git clone https://github.com/JakobEngel/dso.git
+
+2. 安装相应的依赖项
+
+$ sudo apt-get install libsuitesparse-dev libeigen3-dev libboost-all-dev
+
+最好将ziplib装上(下载的源码里有安装包)，因为在运行数据集的时候，可以直接读取.zip文件。在libzip解压文件下，敲下面几行命令：
+
+$ ./configure
+$ make
+$ sudo make install
+$ sudo cp lib/zipconf.h /usr/local/include/zipconf.h  
+
+3. 安装DSO,在dso文件下输入：
+
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make -j
+
+此时，有可能会报如下的错误
+/usr/bin/ld: CMakeFiles/dso_dataset.dir/src/main_dso_pangolin.cpp.o: undefined reference to symbol 'pthread_create@@GLIBC_2.2.5'
+//lib/x86_64-linux-gnu/libpthread.so.0: error adding symbols: DSO missing from command line collect2: error: ld returned 1 
+exit status CMakeFiles/dso_dataset.dir/build.make:139: recipe for target 'bin/dso_dataset' failed make[2]: 
+*** [bin/dso_dataset] Error 1 CMakeFiles/Makefile2:67: recipe for target 'CMakeFiles/dso_dataset.dir/all' failed make[1]:
+*** [CMakeFiles/dso_dataset.dir/all] Error 2 Makefile:83: recipe for target 'all' failed make: *** [all] Error 2
+
+解决方案： 修改CMakeLists.txt有关于Thread，首先在CMakeLists.txt中添加一条：
+
+FIND_PACKAGE(Threads QUIET)
+
+然后将：
+
+if (OpenCV_FOUND AND Pangolin_FOUND) 
+    message("--- compiling dso_dataset.") 
+    add_executable(dso_dataset ${PROJECT_SOURCE_DIR}/src/main_dso_pangolin.cpp ) 
+  target_link_libraries(dso_dataset dso boost_system boost_thread cxsparse ${LIBZIP_LIBRARY} ${Pangolin_LIBRARIES} ${OpenCV_LIBS} ) 
+else() 
+  message("--- not building dso_dataset, since either don't have openCV or Pangolin.") 
+endif()
+改为：
+
+if (OpenCV_FOUND AND Pangolin_FOUND) 
+    message("--- compiling dso_dataset.") 
+    add_executable(dso_dataset ${PROJECT_SOURCE_DIR}/src/main_dso_pangolin.cpp ) 
+  target_link_libraries(dso_dataset dso boost_system boost_thread cxsparse ${LIBZIP_LIBRARY} ${Pangolin_LIBRARIES} ${OpenCV_LIBS} ${CMAKE_THREAD_LIBS_INIT}) 
+else() 
+  message("--- not building dso_dataset, since either don't have openCV or Pangolin.") 
+endif()
+
+然后重新编译就能过
