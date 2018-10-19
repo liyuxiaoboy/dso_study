@@ -7,3 +7,11 @@ cd dso/build
 		vignette=/home/yxli/dataset/sequence_02/vignette.png \
 		preset=0 \
 		mode=0
+
+
+//ros
+roscore
+source roswork/usb_cam/devel/setup.bash
+rosrun usb_cam usb_cam_node
+source roswork/dos_ws/devel/setup.bash 
+rosrun dso_ros dso_live image:=/usb_cam/image_raw calib=//home/yxli/roswork/dos_ws/camera.txt mode=1
