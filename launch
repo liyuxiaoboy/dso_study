@@ -15,3 +15,6 @@ source roswork/usb_cam/devel/setup.bash
 rosrun usb_cam usb_cam_node
 source roswork/dos_ws/devel/setup.bash 
 rosrun dso_ros dso_live image:=/usb_cam/image_raw calib=//home/yxli/roswork/dos_ws/camera.txt mode=1
+
+//for apollo
+rosrun dso_ros dso_live image:=/camera/image calib=//home/yxli/roswork/dos_ws/camera_apollo.txt  mode=1
